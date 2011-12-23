@@ -19,9 +19,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import org.w3c.dom.Element;
 
 public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
-	static String bodyContent = "<ns2:testResponse xmlns:ns2=\"http://ws.test.ccsl.usp.br/\">" +
-			"   <return>Vaca</return>" +
-			"</ns2:testResponse>";
+	static String bodyContent;
 
 	public static String getBodyContent() {
 		return bodyContent;
@@ -122,7 +120,7 @@ public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
 			return; 
 		}
 
-		System.out.println("-- SOAP message ------------------"); 
+		System.out.println("SOAP message:"); 
 		try { 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
 			msg.writeTo(baos); 
@@ -130,7 +128,7 @@ public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 		}
-		System.out.println("----------------------------------");
+		System.out.println("");
 	}
 
 
