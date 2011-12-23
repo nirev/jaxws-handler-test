@@ -19,17 +19,20 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 import org.w3c.dom.Element;
 
 public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
-	String bodyContent = "<ns2:testResponse xmlns:ns2=\"http://ws.test.ccsl.usp.br/\">" +
-						 "   <return>Vaca</return>" +
-						 "</ns2:testResponse>";
-	
-	String content = "<S:Envelope xmlns:S=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
-			"   <S:Body>" +	bodyContent + "</S:Body>" +
-			"</S:Envelope>";
-	
+	static String bodyContent = "<ns2:testResponse xmlns:ns2=\"http://ws.test.ccsl.usp.br/\">" +
+			"   <return>Vaca</return>" +
+			"</ns2:testResponse>";
+
+	public static String getBodyContent() {
+		return bodyContent;
+	}
+
+	public static void setBodyContent(String bodyContent) {
+		ContentSetter.bodyContent = bodyContent;
+	}
+
 	@Override
 	public void close(MessageContext context) {
-
 	}
 
 	@Override
@@ -44,59 +47,45 @@ public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
 
 		try { 
 			if (outbound) { 
-				// OUTBOUND 
-
 				System.out.println("Direction=outbound (handleMessage)"); 
 				SOAPMessage msg = context.getMessage();
-				
-				//context.setMessage(MessageFactory.newInstance().createMessage(
-				//		null, new ByteArrayInputStream(content.getBytes())));
 
 				// get SOAP-Part 
 				SOAPPart sp = msg.getSOAPPart(); 
 
 				//edit Envelope 
 				SOAPEnvelope env = sp.getEnvelope(); 
-				
-				// add namespaces 
-				//env.addNamespaceDeclaration(name, url); 
-
-				// add the Header with additional Elements 
-				//SOAPElement soapElement1 = env.addHeader().addHeaderElement(
-				//		new QName(namespace_URI, local_part)); 
-				//soapElement1.addTextNode("something"); 
-
 
 				// get the SOAP-Body 
 				SOAPBody body = env.getBody(); 
-				
-				body.removeContents();
-				
-				
-				DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
-						.newInstance();
-				docBuilderFactory.setNamespaceAware(true);
-								
-				Element node = docBuilderFactory  
-					    .newDocumentBuilder()
-					    .parse(new ByteArrayInputStream(bodyContent.getBytes()))
-					    .getDocumentElement();
-				
-				body.addChildElement(SOAPFactory.newInstance().createElement(node));
-				
+
+				if(bodyContent != null){
+					// remove previous content
+					body.removeContents();
+
+					// create element from string
+					DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+					docBuilderFactory.setNamespaceAware(true);
+
+					Element node = docBuilderFactory
+							.newDocumentBuilder()
+							.parse(new ByteArrayInputStream(bodyContent.getBytes()))
+							.getDocumentElement();
+
+					// add element do SOAP Body
+					body.addChildElement(SOAPFactory.newInstance().createElement(node));
+				}
+
 				// print SOAP-Message 
 				dumpSOAPMessage(msg); 
 
 			} else { 
-				// INBOUND 
 				System.out.println("Direction=inbound (handleMessage)"); 
 				SOAPMessage msg = ((SOAPMessageContext) context).getMessage(); 
 				dumpSOAPMessage(msg); 
 			} 
 
 		} catch (Exception e) { 
-
-			//All other unhandled problems. 
 			e.printStackTrace(); 
 		} 
 		return true;  
@@ -131,11 +120,9 @@ public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
 		if (msg == null) { 
 			System.out.println("SOAP Message is null"); 
 			return; 
-		} 
-		System.out.println(""); 
-		System.out.println("--------------------"); 
-		System.out.println("DUMP OF SOAP MESSAGE"); 
-		System.out.println("--------------------"); 
+		}
+
+		System.out.println("-- SOAP message ------------------"); 
 		try { 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
 			msg.writeTo(baos); 
@@ -143,6 +130,7 @@ public class ContentSetter implements SOAPHandler<SOAPMessageContext> {
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 		}
+		System.out.println("----------------------------------");
 	}
 
 
